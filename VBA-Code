@@ -1,4 +1,3 @@
-VBA-Code-Final
 Sub stocktest()
     ' Set dimensions
     Dim totalValue As Double
