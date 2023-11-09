@@ -1,0 +1,153 @@
+VBA-Code-Final
+Sub stocktest()
+    ' Set dimensions
+    Dim totalValue As Double
+    Dim i As Long
+    Dim yearlyChange As Double
+    Dim j As Integer
+    Dim openTicker As Long
+    Dim rowCount As Long
+    Dim percentChange As Double
+    Dim days As Integer
+    Dim dailyChange As Double
+    Dim averageChange As Double
+    Dim ws As Worksheet
+    Dim opening As Double
+    Dim closing As Double
+    Dim greatestInc As Double
+    Dim greatestDec As Double
+    Dim greatestTotalVal As Double
+    Dim greatestTicker As String
+    Dim smallestTicker As String
+    Dim greatestVolTicker As String
+    
+    ' Loop through each worksheet (tab) in the Excel file
+    For Each ws In Worksheets
+        ' Initialize values for each worksheet
+        j = 0
+        total = 0
+        change = 0
+        openTicker = 2
+        dailyChange = 0
+        opening = 0
+        ' Set title row
+        ws.Range("I1").Value = "Ticker"
+        ws.Range("J1").Value = "Yearly Change"
+        ws.Range("K1").Value = "Percent Change"
+        ws.Range("L1").Value = "Total Stock Volume"
+        ws.Range("P1").Value = "Ticker"
+        ws.Range("Q1").Value = "Value"
+        ws.Range("O2").Value = "Greatest % Increase"
+        ws.Range("O3").Value = "Greatest % Decrease"
+        ws.Range("O4").Value = "Greatest Total Value"
+        
+        ' get the row number of the last row with data
+        rowCount = ws.Cells(Rows.Count, "A").End(xlUp).row
+          
+        For i = 2 To rowCount
+            
+            ' first opening non zero
+            If opening = 0 Then
+                opening = Cells(i, 3).Value
+        
+            End If
+        
+            ' Add to the Total Stock Volume
+            totalValue = totalValue + ws.Cells(i, 7).Value
+            
+             ' Check if we are still within the same stock, if not...
+            If ws.Cells(i + 1, 1).Value <> ws.Cells(i, 1).Value Then
+        
+                ' Ticker
+                ws.Cells(openTicker, 9).Value = ws.Cells(i, 1).Value
+                ' Total stock value
+                ws.Cells(openTicker, 12).Value = totalValue
+                ws.Cells(openTicker, 12).NumberFormat = "#,##0"
+                
+            
+                ' re-initialize total value
+                totalValue = 0
+            
+                ' calculate yearly change
+                closing = ws.Cells(i, 6).Value
+                yearlyChange = closing - opening
+                
+                ws.Cells(openTicker, 10).Value = yearlyChange
+                
+                    ' color coding yearly change
+                If yearlyChange > 0 Then
+                    ws.Cells(openTicker, 10).Interior.ColorIndex = 4
+                    ws.Cells(openTicker, 11).Interior.ColorIndex = 4
+                ElseIf yearlyChange < 0 Then
+                    ws.Cells(openTicker, 10).Interior.ColorIndex = 3
+                    ws.Cells(openTicker, 11).Interior.ColorIndex = 3
+                Else
+                    ws.Cells(openTicker, 10).Interior.ColorIndex = 0
+                    ws.Cells(openTicker, 11).Interior.ColorIndex = 0
+                    
+                End If
+                
+            
+                ' calculate percent change
+                percentChange = (closing - opening) / opening
+                ws.Cells(openTicker, 11).Value = percentChange
+                ws.Cells(openTicker, 11).NumberFormat = "0.00%"
+                
+                
+                ' go to next ticker row
+                openTicker = openTicker + 1
+            End If
+        
+        Next i
+        
+        j = openTicker
+        greatestInc = ws.Cells(2, 11).Value
+        greatestDec = ws.Cells(2, 11).Value
+        greatestTotalVol = ws.Cells(2, 12).Value
+        greatestTicker = ws.Cells(2, 1).Value
+        smallestTicker = ws.Cells(2, 1).Value
+        greatestVolTicker = ws.Cells(2, 1).Value
+    
+        For j = 2 To openTicker
+            
+            
+            If ws.Cells(j, 11).Value > greatestInc Then
+                greatestTicker = ws.Cells(j, 9).Value
+                
+                greatestInc = ws.Cells(j, 11).Value
+            
+            End If
+            
+            If ws.Cells(j, 11).Value < greatestDec Then
+                smallestTicker = ws.Cells(j, 9).Value
+                greatestDec = ws.Cells(j, 11).Value
+                
+            End If
+            
+             If ws.Cells(j, 12).Value > greatestTotalVol Then
+                greatestVolTicker = ws.Cells(j, 9).Value
+                greatestTotalVol = ws.Cells(j, 12).Value
+                
+            End If
+                
+        Next j
+        
+        'printing the greatest
+        ws.Cells(2, 17).Value = greatestInc
+        ws.Cells(2, 17).NumberFormat = "0.00%"
+        ws.Cells(3, 17).Value = greatestDec
+        ws.Cells(3, 17).NumberFormat = "0.00%"
+        ws.Cells(4, 17).Value = greatestTotalVol
+            ws.Cells(4, 17).NumberFormat = "#,##0"
+        
+        ' name ticker
+        ws.Cells(2, 16).Value = greatestTicker
+        ws.Cells(3, 16).Value = smallestTicker
+        ws.Cells(4, 16).Value = greatestVolTicker
+        
+        ' ChangeColumnWidth
+        ws.Columns("O").ColumnWidth = 20
+        
+    Next ws
+    
+End Sub
